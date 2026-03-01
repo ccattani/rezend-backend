@@ -51,14 +51,14 @@ router.post(
 router.patch(
   '/:id/status',
   verifyToken,
-  verifyRole(['OWNER']),
+  verifyRole(['CHEFE']),
   checkController.updateStatus
 )
 
 router.get(
   '/',
   verifyToken,
-  verifyRole(['OWNER']),
+  verifyRole(['CHEFE']),
   checkController.listChecks
 )
 

@@ -81,6 +81,6 @@ module.exports = router
 router.post(
   '/:id/sell',
   verifyToken,
-  verifyRole(['OWNER', 'COORDINATOR']),
+  verifyRole(['CHEFE', 'COORDENADOR']),
   vehicleController.sellVehicle
 )

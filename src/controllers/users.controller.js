@@ -18,7 +18,7 @@ module.exports = {
         return res.status(409).json({ error: 'Email já cadastrado' })
       }
 
-      const allowedRoles = ['USER', 'OWNER', 'ADMIN']
+      const allowedRoles = ['USER', 'CHEFE', 'COORDENADOR', 'COLABORADOR']
       const safeRole = allowedRoles.includes(role) ? role : 'USER'
 
       const passwordHash = await bcrypt.hash(String(password), 10)

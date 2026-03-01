@@ -13,9 +13,9 @@ async function main() {
   }
 
   // se já existe OWNER, não faz nada
-  const existingOwner = await prisma.user.findFirst({ where: { role: 'OWNER' } })
+  const existingOwner = await prisma.user.findFirst({ where: { role: 'CHEFE' } })
   if (existingOwner) {
-    console.log('OWNER já existe:', existingOwner.email)
+    console.log('CHEFE já existe:', existingOwner.email)
     return
   }
 
@@ -26,25 +26,25 @@ async function main() {
     // promove esse usuário a OWNER
     await prisma.user.update({
       where: { email: normalizedEmail },
-      data: { role: 'OWNER', name: existingByEmail.name || name }
+      data: { role: 'CHEFE', name: existingByEmail.name || name }
     })
-    console.log('Usuário existente promovido a OWNER:', normalizedEmail)
+    console.log('Usuário existente promovido a CHEFE:', normalizedEmail)
     return
   }
 
   const passwordHash = await bcrypt.hash(String(password), 10)
 
-  const owner = await prisma.user.create({
+  const chefe = await prisma.user.create({
     data: {
       name: String(name).trim(),
       email: normalizedEmail,
       password: passwordHash, // guarda hash no campo password
-      role: 'OWNER'
+      role: 'CHEFE'
     },
     select: { id: true, name: true, email: true, role: true, createdAt: true }
   })
 
-  console.log('OWNER criado:', owner.email)
+  console.log('CHEFE criado:', chefe.email)
 }
 
 main()
