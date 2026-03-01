@@ -99,3 +99,70 @@ exports.listVehicles = async () => {
     }
   })
 }
+
+async function updateVehicle(id, body) {
+  const { plate, model, year, purchaseValue, saleValue, status } = body
+
+  const updateData = {}
+
+  if (plate !== undefined) updateData.plate = String(plate).trim().toUpperCase()
+  if (model !== undefined) updateData.model = String(model).trim()
+  if (year !== undefined) updateData.year = Number(year)
+  if (purchaseValue !== undefined) updateData.purchaseValue = Number(purchaseValue)
+  if (saleValue !== undefined) updateData.saleValue = saleValue === null ? null : Number(saleValue)
+  if (status !== undefined) updateData.status = status
+
+  if (updateData.year !== undefined && Number.isNaN(updateData.year)) {
+    const err = new Error('year inválido')
+    err.status = 400
+    throw err
+  }
+  if (updateData.purchaseValue !== undefined && Number.isNaN(updateData.purchaseValue)) {
+    const err = new Error('purchaseValue inválido')
+    err.status = 400
+    throw err
+  }
+  if (updateData.saleValue !== undefined && updateData.saleValue !== null && Number.isNaN(updateData.saleValue)) {
+    const err = new Error('saleValue inválido')
+    err.status = 400
+    throw err
+  }
+
+  if (updateData.status === 'SOLD') {
+    let finalSaleValue = updateData.saleValue
+
+    if (finalSaleValue === undefined) {
+      const current = await prisma.vehicle.findUnique({
+        where: { id },
+        select: { saleValue: true }
+      })
+      finalSaleValue = current?.saleValue
+    }
+
+    if (finalSaleValue === null || finalSaleValue === undefined) {
+      const err = new Error('saleValue é obrigatório quando status = SOLD')
+      err.status = 400
+      throw err
+    }
+  }
+
+  return prisma.vehicle.update({
+    where: { id },
+    data: updateData,
+    select: {
+      id: true,
+      plate: true,
+      model: true,
+      year: true,
+      purchaseValue: true,
+      saleValue: true,
+      status: true,
+      createdAt: true
+    }
+  })
+}
+
+module.exports = {
+  // ...seus outros exports
+  updateVehicle
+}
