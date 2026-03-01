@@ -1,3 +1,4 @@
+
 const jwt = require('jsonwebtoken')
 
 exports.verifyToken = (req, res, next) => {
@@ -7,11 +8,25 @@ exports.verifyToken = (req, res, next) => {
     return res.status(401).json({ error: 'Token não fornecido' })
   }
 
-  const token = authHeader.split(' ')[1]
+  const [type, token] = authHeader.split(' ')
+  if (type !== 'Bearer' || !token) {
+    return res.status(401).json({ error: 'Token não fornecido' })
+  }
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET)
-    req.user = decoded
+
+    // padroniza o formato do req.user
+    req.user = {
+      id: decoded.sub,          // <- AQUI está a chave
+      email: decoded.email,
+      role: decoded.role
+    }
+
+    if (!req.user.id) {
+      return res.status(401).json({ error: 'Token inválido' })
+    }
+
     next()
   } catch (error) {
     return res.status(401).json({ error: 'Token inválido' })
@@ -20,7 +35,7 @@ exports.verifyToken = (req, res, next) => {
 
 exports.verifyRole = (roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!req.user?.role || !roles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Acesso negado' })
     }
     next()
