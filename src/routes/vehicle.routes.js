@@ -2,14 +2,16 @@ const express = require('express')
 const router = express.Router()
 
 const vehicleController = require('../controllers/vehicle.controller')
-const { verifyToken } = require('../middleware/auth.middleware')
-const { verifyRole } = require('../middleware/auth.middleware') // se seu verifyRole está nesse arquivo
+const { verifyToken, verifyRole } = require('../middleware/auth.middleware')
 
-router.get('/', verifyToken, vehicleController.list)
-router.get('/:id', verifyToken, vehicleController.getById)
-router.post('/', verifyToken, verifyRole(['OWNER', 'COORDINATOR']), vehicleController.create)
+router.get('/', verifyToken, vehicleController.listVehicles)
+router.get('/:id', verifyToken, vehicleController.getVehicleById)
 
-// NOVO:
+router.post('/', verifyToken, verifyRole(['OWNER', 'COORDINATOR']), vehicleController.createVehicle)
+
 router.patch('/:id', verifyToken, verifyRole(['OWNER', 'COORDINATOR']), vehicleController.update)
+
+// (opcional) endpoint específico de venda — se você quiser manter:
+router.post('/:id/sell', verifyToken, verifyRole(['OWNER', 'COORDINATOR']), vehicleController.sellVehicle)
 
 module.exports = router

@@ -38,8 +38,6 @@ exports.listVehicles = async (req, res) => {
   }
 };
 
-const prisma = require('../prisma')
-
 exports.update = async (req, res) => {
   try {
     const { id } = req.params
@@ -54,5 +52,17 @@ exports.update = async (req, res) => {
     }
     console.error('vehicle update error:', err)
     return res.status(500).json({ error: 'Erro interno' })
+  }
+}
+
+exports.getVehicleById = async (req, res) => {
+  try {
+    const { id } = req.params
+    const vehicle = await vehicleService.getVehicleById(id)
+    return res.json(vehicle)
+  } catch (e) {
+    // se no service você lançar erro quando não achar
+    const status = e?.status || 400
+    return res.status(status).json({ error: e.message })
   }
 }

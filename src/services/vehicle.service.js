@@ -162,6 +162,16 @@ async function updateVehicle(id, body) {
   })
 }
 
+async function getVehicleById(id) {
+  const vehicle = await prisma.vehicle.findUnique({ where: { id } })
+  if (!vehicle) {
+    const err = new Error('Veículo não encontrado')
+    err.status = 404
+    throw err
+  }
+  return vehicle
+}
+
 module.exports = {
   // ...seus outros exports
   updateVehicle
