@@ -37,9 +37,9 @@
 const express = require('express')
 const router = express.Router()
 
-const { verifyToken, verifyRole } = require('../middlerware/auth.middleware')
+const { verifyToken, verifyRole } = require('../middleware/auth.middleware')
 const checkController = require('../controllers/check.controller')
-const { verifyPermission } = require('../middlerware/permission.middleware')
+const { verifyPermission } = require('../middleware/permission.middleware')
 
 router.post(
   '/',

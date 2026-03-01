@@ -48,9 +48,9 @@
 const express = require('express')
 const router = express.Router()
 
-const upload = require('../middlerware/upload.middleware')
-const { verifyToken } = require('../middlerware/auth.middleware')
-const { verifyPermission } = require('../middlerware/permission.middleware')
+const upload = require('../middleware/upload.middleware')
+const { verifyToken } = require('../middleware/auth.middleware')
+const { verifyPermission } = require('../middleware/permission.middleware')
 const documentController = require('../controllers/document.controller')
 
 router.post(
