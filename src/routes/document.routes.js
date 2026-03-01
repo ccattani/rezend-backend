@@ -3,7 +3,7 @@
  * /documents:
  *   post:
  *     tags: [Documents]
- *     summary: Upload de documento (OPERATOR/COORDINATOR)
+ *     summary: Upload de documento (COLABORADOR/COORDENADOR)
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true

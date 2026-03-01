@@ -8,9 +8,9 @@ datasource db {
 }
 
 enum Role {
-  OWNER
-  COORDINATOR
-  OPERATOR
+  CHEFE
+  COORDENADOR
+  COLABORADOR
 }
 
 enum VehicleStatus {
