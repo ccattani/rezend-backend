@@ -85,7 +85,7 @@ module.exports = {
     }
   },
 
-  async me(req, res) {
+  async me(req, res){
   try {
     const user = await prisma.user.findUnique({
       where: { id: req.user.id },
