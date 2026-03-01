@@ -24,9 +24,9 @@ const { verifyToken, verifyRole } = require('./middleware/auth.middleware')
 app.get(
   '/test-owner',
   verifyToken,
-  verifyRole(['OWNER']),
+  verifyRole(['CHEFE']),
   (req, res) => {
-    res.json({ message: 'Acesso autorizado como OWNER' })
+    res.json({ message: 'Acesso autorizado como CHEFE' })
   }
 )
 

@@ -3,7 +3,7 @@
  * /checks:
  *   post:
  *     tags: [Checks]
- *     summary: Cria cheque (OWNER)
+ *     summary: Cria cheque (CHEFE)
  *     security: [{ bearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -19,7 +19,7 @@
  * /checks/{id}/status:
  *   patch:
  *     tags: [Checks]
- *     summary: Atualiza status do cheque (OWNER)
+ *     summary: Atualiza status do cheque (CHEFE)
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - in: path
@@ -51,14 +51,14 @@ router.post(
 router.patch(
   '/:id/status',
   verifyToken,
-  verifyRole(['OWNER']),
+  verifyRole(['CHEFE']),
   checkController.updateStatus
 )
 
 router.get(
   '/',
   verifyToken,
-  verifyRole(['OWNER']),
+  verifyRole(['CHEFE']),
   checkController.listChecks
 )
 

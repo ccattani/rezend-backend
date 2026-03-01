@@ -3,7 +3,7 @@
  * /audit:
  *   get:
  *     tags: [Audit]
- *     summary: Lista logs de auditoria (OWNER)
+ *     summary: Lista logs de auditoria (CHEFE)
  *     security: [{ bearerAuth: [] }]
  *     parameters:
  *       - in: query

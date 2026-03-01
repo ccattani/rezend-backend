@@ -17,10 +17,10 @@ async function main() {
   const hash = await bcrypt.hash(password, 10)
 
   await prisma.user.create({
-    data: { name, email, password: hash, role: 'OWNER' }
+    data: { name, email, password: hash, role: 'CHEFE' }
   })
 
-  console.log('OWNER seed criado:', email)
+  console.log('CHEFE seed criado:', email)
 }
 
 main()

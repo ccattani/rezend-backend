@@ -79,7 +79,7 @@ router.get(
 router.post(
   '/:id/sell',
   verifyToken,
-  verifyRole(['OWNER', 'COORDINATOR']),
+  verifyRole(['CHEFE', 'COORDENADOR']),
   vehicleController.sellVehicle
 )
 
