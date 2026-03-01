@@ -76,11 +76,11 @@ router.get(
   vehicleController.listVehicles
 )
 
-module.exports = router
-
 router.post(
   '/:id/sell',
   verifyToken,
   verifyRole(['OWNER', 'COORDINATOR']),
   vehicleController.sellVehicle
 )
+
+module.exports = router

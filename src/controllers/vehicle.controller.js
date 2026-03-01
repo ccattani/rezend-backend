@@ -1,4 +1,4 @@
-const vehicleService = require("../services/vehicle.service");
+const vehicleService = require('../services/vehicle.service')
 
 exports.createVehicle = async (req, res) => {
   try {
