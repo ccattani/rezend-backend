@@ -16,7 +16,7 @@ function signToken(user) {
 }
 
 module.exports = {
-  // Cadastro público: SEMPRE cria OPERATOR (menor privilégio do seu enum)
+  // Cadastro público: SEMPRE cria COLABORADOR (menor privilégio do seu enum)
   async register(req, res) {
     try {
       const { name, email, password } = req.body
@@ -40,7 +40,7 @@ module.exports = {
           name: String(name).trim(),
           email: normalizedEmail,
           password: passwordHash,   // <- IMPORTANTE (schema exige "password")
-          role: 'OPERATOR'          // <- IMPORTANTE (enum Role)
+          role: 'COLABORADOR'          // <- IMPORTANTE (enum Role)
         },
         select: { id: true, name: true, email: true, role: true, createdAt: true }
       })

@@ -27,8 +27,6 @@ app.use('/documents', documentRoutes)
 app.use('/audit', auditRoutes)
 
 const usersRoutes = require('./routes/users.routes')
-
-app.use('/auth', authRoutes)
 app.use('/users', usersRoutes)
 
 module.exports = app

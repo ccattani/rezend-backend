@@ -6,7 +6,7 @@ const prisma = new PrismaClient()
 async function main() {
   const email = process.env.SEED_OWNER_EMAIL
   const password = process.env.SEED_OWNER_PASSWORD
-  const name = process.env.SEED_OWNER_NAME || 'OWNER'
+  const name = process.env.SEED_OWNER_NAME || 'CHEFE'
 
   if (!email || !password) {
     throw new Error('SEED_OWNER_EMAIL e SEED_OWNER_PASSWORD são obrigatórios')
