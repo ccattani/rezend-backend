@@ -83,5 +83,21 @@ module.exports = {
       console.error('login error:', err)
       return res.status(500).json({ error: 'Erro interno', details: err.message, code: err.code })
     }
+  },
+
+  async me(req, res) {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { id: true, name: true, email: true, role: true, createdAt: true }
+    })
+
+    if (!user) return res.status(404).json({ error: 'Usuário não encontrado' })
+
+    return res.json({ user })
+  } catch (err) {
+    console.error('me error:', err)
+    return res.status(500).json({ error: 'Erro interno' })
   }
+}
 }
