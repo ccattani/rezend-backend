@@ -52,5 +52,6 @@ const { verifyPermission } = require('../middleware/permission.middleware')
 
 router.post('/register', verifyToken, verifyPermission('CREATE_USER'), authController.register)
 router.post('/login', authController.login)
+router.get('/me', verifyToken, authController.me)
 
 module.exports = router
