@@ -1,69 +1,101 @@
-const vehicleService = require('../services/vehicle.service')
+const prisma = require('../prisma')
+const audit = require('./audit.service')
 
-exports.createVehicle = async (req, res) => {
-  try {
-    const userId = req.user.id
-    const vehicle = await vehicleService.createVehicle(req.body, userId)
-    return res.status(201).json(vehicle)
-  } catch (err) {
-    if (err?.code === 'P2002') {
-      return res.status(409).json({ error: 'Placa já cadastrada', code: 'PLATE_ALREADY_EXISTS' })
+exports.createVehicle = async (data, userId) => {
+  const { plate, model, year, purchaseValue, saleValue } = data
+
+  if (!plate || !model || year == null || purchaseValue == null) {
+    throw new Error('Campos obrigatórios não preenchidos')
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const vehicle = await tx.vehicle.create({
+      data: {
+        plate,
+        model,
+        year: Number(year),
+        purchaseValue: Number(purchaseValue),
+        saleValue: saleValue == null ? null : Number(saleValue)
+      }
+    })
+
+    await tx.vehicleMovement.create({
+      data: {
+        type: 'CHECK_IN',
+        vehicleId: vehicle.id,
+        userId
+      }
+    })
+
+    // loga DEPOIS de criar
+    await tx.auditLog.create({
+      data: {
+        userId,
+        action: 'CREATE_VEHICLE',
+        entity: 'Vehicle',
+        entityId: vehicle.id,
+        meta: {
+          plate: vehicle.plate,
+          model: vehicle.model,
+          year: vehicle.year,
+          purchaseValue: vehicle.purchaseValue,
+          saleValue: vehicle.saleValue
+        }
+      }
+    })
+
+    return vehicle
+  })
+}
+
+exports.sellVehicle = async (vehicleId, saleValue, userId) => {
+  if (saleValue == null || Number(saleValue) <= 0) {
+    throw new Error('Valor de venda é obrigatório e deve ser maior que zero')
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const vehicle = await tx.vehicle.findUnique({ where: { id: vehicleId } })
+    if (!vehicle) throw new Error('Veículo não encontrado')
+    if (vehicle.status !== 'IN_STOCK') throw new Error('Veículo não está disponível para venda')
+
+    const updated = await tx.vehicle.update({
+      where: { id: vehicleId },
+      data: {
+        status: 'SOLD',
+        saleValue: Number(saleValue)
+      }
+    })
+
+    await tx.vehicleMovement.create({
+      data: {
+        type: 'CHECK_OUT',
+        vehicleId,
+        userId
+      }
+    })
+
+    await tx.auditLog.create({
+      data: {
+        userId,
+        action: 'SELL_VEHICLE',
+        entity: 'Vehicle',
+        entityId: vehicleId,
+        meta: {
+          fromStatus: vehicle.status,
+          toStatus: 'SOLD',
+          saleValue: Number(saleValue)
+        }
+      }
+    })
+
+    return updated
+  })
+}
+
+exports.listVehicles = async () => {
+  return await prisma.vehicle.findMany({
+    include: {
+      movements: { orderBy: { createdAt: 'asc' } }
     }
-    console.error('createVehicle error:', err)
-    return res.status(500).json({ error: 'Erro interno' })
-  }
-}
-
-exports.listVehicles = async (req, res) => {
-  try {
-    const { status } = req.query
-    const vehicles = await vehicleService.listVehicles({ status })
-    return res.json(vehicles)
-  } catch (err) {
-    console.error('listVehicles error:', err)
-    return res.status(500).json({ error: 'Erro interno' })
-  }
-}
-
-exports.getVehicleById = async (req, res) => {
-  try {
-    const { id } = req.params
-    const vehicle = await vehicleService.getVehicleById(id)
-    return res.json(vehicle)
-  } catch (err) {
-    const status = err?.status || 500
-    if (status === 404) return res.status(404).json({ error: err.message })
-    console.error('getVehicleById error:', err)
-    return res.status(500).json({ error: 'Erro interno' })
-  }
-}
-
-exports.updateVehicle = async (req, res) => {
-  try {
-    const { id } = req.params
-    const updated = await vehicleService.updateVehicle(id, req.body)
-    return res.json(updated)
-  } catch (err) {
-    if (err?.code === 'P2002') {
-      return res.status(409).json({ error: 'Placa já cadastrada', code: 'PLATE_ALREADY_EXISTS' })
-    }
-    const status = err?.status || 500
-    if (status !== 500) return res.status(status).json({ error: err.message })
-    console.error('updateVehicle error:', err)
-    return res.status(500).json({ error: 'Erro interno' })
-  }
-}
-
-exports.sellVehicle = async (req, res) => {
-  try {
-    const userId = req.user.id
-    const { id } = req.params
-    const { saleValue } = req.body
-
-    const updated = await vehicleService.sellVehicle(id, saleValue, userId)
-    return res.json(updated)
-  } catch (err) {
-    const status = err?.status || 400
-    return res.status(status).json({ error: err.message })
-  }
+  })
 }
