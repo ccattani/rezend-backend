@@ -194,3 +194,12 @@ exports.updateVehicle = async (vehicleId, data, userId) => {
     return updated
   })
 }
+
+exports.getVehicleById = async (id) => {
+  return await prisma.vehicle.findUnique({
+    where: { id },
+    include: {
+      movements: { orderBy: { createdAt: 'asc' } }
+    }
+  })
+}

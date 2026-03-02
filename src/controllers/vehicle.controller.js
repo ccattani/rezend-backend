@@ -43,3 +43,19 @@ exports.updateVehicle = async (req, res) => {
     return res.status(400).json({ error: e.message })
   }
 }
+
+exports.getVehicleById = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    const vehicle = await vehicleService.getVehicleById(id)
+
+    if (!vehicle) {
+      return res.status(404).json({ error: 'Veículo não encontrado' })
+    }
+
+    return res.json(vehicle)
+  } catch (e) {
+    return res.status(400).json({ error: e.message })
+  }
+}

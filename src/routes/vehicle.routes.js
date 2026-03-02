@@ -103,6 +103,12 @@ router.get(
   vehicleController.listVehicles
 )
 
+router.get(
+  '/:id',
+  verifyToken,
+  vehicleController.getVehicleById
+)
+
 router.post(
   '/:id/sell',
   verifyToken,
