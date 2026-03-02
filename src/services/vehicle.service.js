@@ -99,3 +99,98 @@ exports.listVehicles = async () => {
     }
   })
 }
+
+function buildDiff(before, after) {
+  const diff = {}
+  for (const key of Object.keys(after)) {
+    if (before[key] !== after[key]) {
+      diff[key] = { from: before[key], to: after[key] }
+    }
+  }
+  return diff
+}
+
+exports.updateVehicle = async (vehicleId, data, userId) => {
+  const { plate, model, year, purchaseValue } = data
+
+  // Não deixa update vazio (senão vira endpoint inútil e sujo)
+  const hasAny =
+    plate !== undefined ||
+    model !== undefined ||
+    year !== undefined ||
+    purchaseValue !== undefined
+
+  if (!hasAny) throw new Error('Nenhum campo para atualizar')
+
+  // Validações por campo (só valida se o campo veio)
+  if (plate !== undefined && String(plate).trim().length < 5) {
+    throw new Error('Placa inválida')
+  }
+
+  if (model !== undefined && String(model).trim().length < 2) {
+    throw new Error('Modelo inválido')
+  }
+
+  if (year !== undefined) {
+    const y = Number(year)
+    if (!Number.isInteger(y) || y < 1900 || y > 2100) {
+      throw new Error('Ano inválido')
+    }
+  }
+
+  if (purchaseValue !== undefined) {
+    const pv = Number(purchaseValue)
+    if (Number.isNaN(pv) || pv <= 0) {
+      throw new Error('Valor de compra inválido')
+    }
+  }
+
+  return await prisma.$transaction(async (tx) => {
+    const vehicle = await tx.vehicle.findUnique({ where: { id: vehicleId } })
+    if (!vehicle) throw new Error('Veículo não encontrado')
+
+    // Regra: não altera veículo vendido
+    if (vehicle.status !== 'IN_STOCK') {
+      throw new Error('Não é permitido editar veículo fora de estoque')
+    }
+
+    const updateData = {}
+    if (plate !== undefined) updateData.plate = String(plate).trim()
+    if (model !== undefined) updateData.model = String(model).trim()
+    if (year !== undefined) updateData.year = Number(year)
+    if (purchaseValue !== undefined) updateData.purchaseValue = Number(purchaseValue)
+
+    // Se não mudou nada de verdade, não atualiza (evita audit lixo)
+    const wouldBe = { ...vehicle, ...updateData }
+    const diff = buildDiff(vehicle, wouldBe)
+    if (Object.keys(diff).length === 0) return vehicle
+
+    let updated
+    try {
+      updated = await tx.vehicle.update({
+        where: { id: vehicleId },
+        data: updateData
+      })
+    } catch (err) {
+      // placa duplicada (unique)
+      if (err?.code === 'P2002') {
+        throw new Error('Placa já cadastrada')
+      }
+      throw err
+    }
+
+    await tx.auditLog.create({
+      data: {
+        userId,
+        action: 'UPDATE_VEHICLE',
+        entity: 'Vehicle',
+        entityId: vehicleId,
+        meta: {
+          changes: diff
+        }
+      }
+    })
+
+    return updated
+  })
+}

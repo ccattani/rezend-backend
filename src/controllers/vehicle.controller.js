@@ -31,3 +31,15 @@ exports.listVehicles = async (req, res) => {
     return res.status(400).json({ error: e.message })
   }
 }
+
+exports.updateVehicle = async (req, res) => {
+  try {
+    const userId = req.user.id
+    const { id } = req.params
+
+    const updated = await vehicleService.updateVehicle(id, req.body, userId)
+    return res.json(updated)
+  } catch (e) {
+    return res.status(400).json({ error: e.message })
+  }
+}

@@ -17,7 +17,7 @@ exports.verifyToken = (req, res, next) => {
 
     // padroniza o formato do req.user
     req.user = {
-      id: decoded.sub,          // <- AQUI está a chave
+      id: decoded.sub || decoded.id,          // <- AQUI está a chave
       email: decoded.email,
       role: decoded.role
     }

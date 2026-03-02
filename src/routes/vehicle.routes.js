@@ -56,6 +56,33 @@
  *             schema: { $ref: '#/components/schemas/Error' }
  */
 
+/**
+ * @openapi
+ * /vehicles/{id}:
+ *   put:
+ *     tags: [Vehicles]
+ *     summary: Atualiza dados do veículo (somente IN_STOCK)
+ *     security: [{ bearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/VehicleUpdateRequest'
+ *     responses:
+ *       200: { description: OK }
+ *       400:
+ *         description: Erro
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ */
+
 const express = require('express')
 const router = express.Router()
 
@@ -81,6 +108,13 @@ router.post(
   verifyToken,
   verifyRole(['CHEFE', 'COORDENADOR']),
   vehicleController.sellVehicle
+)
+
+router.put(
+  '/:id',
+  verifyToken,
+  verifyPermission('UPDATE_VEHICLE'),
+  vehicleController.updateVehicle
 )
 
 module.exports = router
